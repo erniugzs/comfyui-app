@@ -33,12 +33,15 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.huilian.comfymobile.MainViewModel
 import com.huilian.comfymobile.data.models.QueueItem
 import kotlinx.coroutines.launch
@@ -147,6 +150,7 @@ fun SwipeableQueueItem(
     onViewImage: (String) -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val density = LocalDensity.current
     val maxOffsetPx = with(density) { 120.dp.toPx() }
     val offsetX = remember { Animatable(0f) }
@@ -274,6 +278,7 @@ fun QueueListItemNoClick(
     item: QueueItem,
     viewModel: MainViewModel
 ) {
+    val context = LocalContext.current
     val progress = viewModel.progressMap.value[item.id] ?: 0f
     val progressPercent = (progress * 100).toInt()
     val isRunning = item.status == "running"
@@ -305,7 +310,13 @@ fun QueueListItemNoClick(
             ) {
                 if (item.imageUrl != null) {
                     AsyncImage(
-                        model = item.imageUrl,
+                        model = ImageRequest.Builder(context)
+                            .data(item.imageUrl)
+                            .memoryCacheKey(item.imageUrl)
+                            .diskCacheKey(item.imageUrl)
+                            .crossfade(true)
+                            .size(coil.size.Size.ORIGINAL)
+                            .build(),
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -489,6 +500,7 @@ private fun ZoomableQueueImage(
     onTap: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val scale = remember { Animatable(1f) }
     val offsetX = remember { Animatable(0f) }
     val offsetY = remember { Animatable(0f) }
@@ -548,7 +560,12 @@ private fun ZoomableQueueImage(
             }
     ) {
         AsyncImage(
-            model = imageUrl,
+            model = ImageRequest.Builder(context)
+                .data(imageUrl)
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .crossfade(true)
+                .build(),
             contentDescription = "全屏图片",
             modifier = Modifier
                 .fillMaxSize()

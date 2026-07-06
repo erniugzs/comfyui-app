@@ -1,5 +1,8 @@
 ﻿package com.huilian.comfymobile.screens
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -8,6 +11,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.huilian.comfymobile.BuildConfig
 import com.huilian.comfymobile.MainViewModel
@@ -58,14 +62,36 @@ fun SettingsScreen(viewModel: MainViewModel) {
         }
 
         // About
+        val context = LocalContext.current
+        val githubUrl = "https://github.com/erniugzs/comfyui-app"
+
         SettingsSection(title = "关于") {
             ListItem(
                 headlineContent = { Text("应用名称") },
-                supportingContent = { Text("绘联APP") }
+                supportingContent = { Text("绘联") }
             )
             ListItem(
                 headlineContent = { Text("版本") },
                 supportingContent = { Text(BuildConfig.VERSION_NAME) }
+            )
+            ListItem(
+                headlineContent = { Text("简介") },
+                supportingContent = {
+                    Text(
+                        "绘联是一款基于 Jetpack Compose 构建的 ComfyUI 移动端客户端，支持工作流编辑、图片生成、队列管理和图库浏览。"
+                    )
+                }
+            )
+            ListItem(
+                headlineContent = { Text("GitHub 项目") },
+                supportingContent = { Text(githubUrl) },
+                trailingContent = {
+                    Icon(Icons.Default.OpenInBrowser, contentDescription = "打开")
+                },
+                modifier = Modifier.clickable {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(githubUrl))
+                    context.startActivity(intent)
+                }
             )
         }
     }

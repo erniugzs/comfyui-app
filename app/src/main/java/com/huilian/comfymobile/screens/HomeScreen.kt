@@ -146,7 +146,7 @@ fun HeaderSection(onInfoClick: () -> Unit) {
     ) {
         Column {
             Text(
-                text = "Welcome Back",
+                text = "欢迎回来",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 14.sp
             )
@@ -179,11 +179,15 @@ fun ServerStatusExpandableCard(viewModel: MainViewModel) {
     val isConnected = viewModel.isConnected.value
     val latency = viewModel.serverLatency.value
     val serverUrl = viewModel.serverUrl.value
-    val workflowsDirectory = viewModel.workflowsDirectory.value
     val rotation by animateFloatAsState(
         targetValue = if (expanded) 180f else 0f,
         label = "arrow_rotation"
     )
+
+    // LAN scan dialog state
+    var showScanDialog by remember { mutableStateOf(false) }
+    var scanResults by remember { mutableStateOf<List<String>?>(null) }
+    var isScanning by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -219,7 +223,7 @@ fun ServerStatusExpandableCard(viewModel: MainViewModel) {
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "Server",
+                            text = "服务器",
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 13.sp
                         )
@@ -259,33 +263,32 @@ fun ServerStatusExpandableCard(viewModel: MainViewModel) {
 
                     // Server URL input
                     ServerInputField(
-                        label = "Server URL",
+                        label = "服务器地址",
                         value = serverUrl,
                         leadingIcon = Icons.Default.Link,
                         onValueChange = { viewModel.serverUrl.value = it }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Workflows Directory input
+                    // API Key input (optional)
                     ServerInputField(
-                        label = "Workflows Directory",
-                        value = workflowsDirectory,
-                        leadingIcon = Icons.Default.Folder,
-                        onValueChange = { viewModel.workflowsDirectory.value = it }
+                        label = "API 密钥（选填）",
+                        value = viewModel.serverApiKey.value,
+                        leadingIcon = Icons.Default.Key,
+                        onValueChange = { viewModel.serverApiKey.value = it }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Converter status
-                    Text(
-                        text = "Converter: not installed",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                        fontSize = 13.sp
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-
                     // Scan button
                     OutlinedButton(
-                        onClick = { viewModel.scanForComfyUI {} },
+                        onClick = {
+                            isScanning = true
+                            showScanDialog = true
+                            viewModel.scanForComfyUI { results ->
+                                scanResults = results
+                                isScanning = false
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -295,7 +298,83 @@ fun ServerStatusExpandableCard(viewModel: MainViewModel) {
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Scan for ComfyUI Servers")
+                        Text("扫描局域网 ComfyUI 服务器")
+                    }
+
+                    // Scan results dialog
+                    if (showScanDialog) {
+                        AlertDialog(
+                            onDismissRequest = {
+                                showScanDialog = false
+                                scanResults = null
+                            },
+                            title = { Text("局域网扫描结果") },
+                            text = {
+                                when {
+                                    isScanning -> {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.Center,
+                                            modifier = Modifier.fillMaxWidth().padding(16.dp)
+                                        ) {
+                                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Text("扫描中...")
+                                        }
+                                    }
+                                    scanResults.isNullOrEmpty() -> {
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            modifier = Modifier.fillMaxWidth().padding(16.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.CloudOff,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(48.dp),
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                                            )
+                                            Spacer(modifier = Modifier.height(12.dp))
+                                            Text("未发现服务器", style = MaterialTheme.typography.bodyLarge)
+                                        }
+                                    }
+                                    else -> {
+                                        Column {
+                                            scanResults?.forEach { ip ->
+                                                OutlinedButton(
+                                                    onClick = {
+                                                        viewModel.updateServerUrl(ip)
+                                                        viewModel.connectToServer()
+                                                        showScanDialog = false
+                                                        scanResults = null
+                                                    },
+                                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                                    shape = RoundedCornerShape(8.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Computer,
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(8.dp))
+                                                    Text(ip)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            confirmButton = {},
+                            dismissButton = {
+                                TextButton(
+                                    onClick = {
+                                        showScanDialog = false
+                                        scanResults = null
+                                    }
+                                ) {
+                                    Text("关闭")
+                                }
+                            }
+                        )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
 

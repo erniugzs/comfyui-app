@@ -752,7 +752,6 @@ fun WorkflowOutputPanel(
             // Queue Prompt 全宽按钮
             Button(
                 onClick = onGenerate,
-                enabled = !isGenerating,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
@@ -773,7 +772,7 @@ fun WorkflowOutputPanel(
                     Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.White)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        "Queue Prompt",
+                        "生成",
                         color = Color.White,
                         fontWeight = FontWeight.SemiBold
                     )

@@ -61,6 +61,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     var workflowsDirectory = mutableStateOf(prefs.getString("workflows_directory", "workflows") ?: "workflows")
         private set
 
+    // Server API key (optional, for auth-required servers)
+    var serverApiKey = mutableStateOf(prefs.getString("server_api_key", "") ?: "")
+   
     // Workflow
     var currentWorkflow = mutableStateOf<UiWorkflow?>(null)
         private set

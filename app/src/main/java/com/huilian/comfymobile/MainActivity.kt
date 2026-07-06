@@ -17,6 +17,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.Coil
+import coil.ImageLoader
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
+import coil.request.CachePolicy
 import com.huilian.comfymobile.screens.*
 import com.huilian.comfymobile.ui.theme.ComfyUIMobileTheme
 
@@ -24,6 +29,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // 配置 Coil 图片缓存：内存 25% 可用 + 磁盘 100MB
+        Coil.setImageLoader {
+            ImageLoader.Builder(this)
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .memoryCache { MemoryCache.Builder(this).maxSizePercent(0.25).build() }
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .diskCache { DiskCache.Builder().directory(cacheDir.resolve("image_cache")).maxSizeBytes(100L * 1024 * 1024).build() }
+                .crossfade(true)
+                .build()
+        }
+
         setContent {
             ComfyUIMobileTheme {
                 val viewModel: MainViewModel = viewModel()
