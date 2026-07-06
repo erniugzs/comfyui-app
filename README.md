@@ -1,117 +1,119 @@
-# 绘联 — ComfyUI 移动端客户端
+# HuiLian — ComfyUI Mobile Client
 
-> 一个基于 Jetpack Compose + Material Design 3 构建的 Android 应用，让你随时随地连接、管理和使用 ComfyUI 工作流。
+> An Android app built with Jetpack Compose and Material Design 3 that lets you connect to, manage, and run ComfyUI workflows from anywhere.
 
----
-
-## 功能一览
-
-### 首页 · 服务器管理
-- 一键连接 / 断开 ComfyUI 服务器
-- 实时检测连接延迟，绿（≤300ms）红（>300ms）直观显示
-- 支持手动输入地址，或一键扫描局域网内的 ComfyUI 实例
-- 支持本地服务器集成（Termux API）
-
-### 工作流 · 编辑与运行
-- JSON 工作流编辑器，支持实时编辑、节点参数调整
-- 节点级配置修改（模型、采样器、步数、CFG、尺寸等）
-- 一键运行工作流，实时推送进度到队列
-
-### 队列 · 任务管理
-- 实时查看生成进度（WebSocket 推送）
-- 任务列表：35×35 缩略图 + 图片名 + 完成时间 + 画布尺寸
-- 绿色进度条同步任务进度
-- **右滑删除**：未完成任务自动中断，已完成任务同步删除服务器图片
-- 点击缩略图全屏查看，支持双击放大、双指缩放、单指平移
-
-### 图库 · 图片浏览
-- 网格布局浏览历史生成图片
-- 全屏查看器支持：
-  - 左右滑动切换图片
-  - 双击缩放（1x ↔ 2.5x）
-  - 双指自由缩放（1x ~ 5x）
-  - 放大后单指平移查看细节，边缘回弹
-- 支持保存到本地相册、分享
-
-### 全局交互
-- **左右边缘滑动返回**：全 App 统一手势，支持返回上一层直至退出
-- 全屏查看器与全局返回手势智能互斥，不冲突
-- Material Design 3 主题，支持系统深色模式
+[中文](README_zh.md)
 
 ---
 
-## 技术栈
+## Features
 
-| 层级 | 技术 |
+### Home · Server Management
+- One-tap connect / disconnect to ComfyUI server
+- Real-time latency detection with color-coded status: green (≤300ms), red (>300ms)
+- Manual address input or one-tap LAN scan for ComfyUI instances
+- Local server integration via Termux API
+
+### Workflow · Edit & Run
+- JSON workflow editor with real-time editing and node parameter adjustment
+- Node-level configuration (model, sampler, steps, CFG, dimensions, etc.)
+- One-tap workflow execution with real-time progress pushed to queue
+
+### Queue · Task Management
+- Real-time progress tracking via WebSocket push
+- Task list: 35×35 thumbnail + image name + completion time + canvas size
+- Green progress bar synced with task progress
+- **Swipe-to-delete**: running tasks are interrupted, completed tasks also delete server images
+- Tap thumbnail for fullscreen view with double-tap zoom, pinch zoom, and pan
+
+### Gallery · Image Browser
+- Grid layout for browsing generated images
+- Fullscreen viewer with:
+  - Horizontal swipe to switch between images
+  - Double-tap zoom (1x ↔ 2.5x)
+  - Pinch-to-zoom (1x ~ 5x)
+  - Single-finger pan with edge bounce-back
+- Save to device gallery and share
+
+### Global Interaction
+- **Edge swipe back gesture**: unified left/right edge swipe to navigate back across the entire app
+- Fullscreen viewer intelligently disables global edge gesture to avoid conflicts
+- Material Design 3 theme with system dark mode support
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
 |---|---|
 | UI | Jetpack Compose + Material Design 3 |
-| 网络 | Retrofit（HTTP）+ Ktor Client（WebSocket） |
-| 图片加载 | Coil |
-| 架构 | MVVM（ViewModel + MutableState） |
-| 序列化 | Gson |
-| 最低版本 | Android 8.0（API 26） |
+| Networking | Retrofit (HTTP) + Ktor Client (WebSocket) |
+| Image Loading | Coil |
+| Architecture | MVVM (ViewModel + MutableState) |
+| Serialization | Gson |
+| Min SDK | Android 8.0 (API 26) |
 
 ---
 
-## 快速开始
+## Getting Started
 
-### 前置条件
-- Android Studio Ladybug 或更新版本
+### Prerequisites
+- Android Studio Ladybug or newer
 - JDK 17+
-- ComfyUI 服务器（本地或远程）
+- A ComfyUI server (local or remote)
 
-### 构建
+### Build
 
 ```bash
-git clone https://github.com/yourname/huilian-comfyui.git
-cd huilian-comfyui
+git clone https://github.com/erniugzs/comfyui-app.git
+cd comfyui-app
 ./gradlew :app:assembleDebug
 ```
 
-APK 输出路径：`app/apks/`
+APK output: `app/apks/`
 
-### 配置服务器
+### Connect to Server
 
-1. 打开 App，展开 **Server** 卡片
-2. 输入 ComfyUI 地址（如 `http://192.168.1.100:8188`）
-3. 点击「连接服务器」
-4. 状态变绿后即可使用
+1. Open the app and expand the **Server** card
+2. Enter your ComfyUI address (e.g. `http://192.168.1.100:8188`)
+3. Tap **Connect**
+4. Once the status turns green, you're ready to go
 
 ---
 
-## 项目结构
+## Project Structure
 
 ```
 app/src/main/java/com/huilian/comfymobile/
-├── MainActivity.kt          # 主入口、全局手势、导航
-├── MainViewModel.kt         # 业务逻辑、网络请求、状态管理
-├── BottomNavItem.kt         # 底部导航定义
+├── MainActivity.kt          # Entry point, global gestures, navigation
+├── MainViewModel.kt         # Business logic, network requests, state management
+├── BottomNavItem.kt         # Bottom navigation definitions
 ├── data/
-│   ├── ComfyUIService.kt    # Retrofit API 接口
-│   ├── RetrofitClient.kt    # 网络客户端配置
-│   ├── WebSocketManager.kt  # WebSocket 连接与事件解析
-│   └── models/              # 数据模型（QueueItem、SavedWorkflow 等）
+│   ├── ComfyUIService.kt    # Retrofit API interface
+│   ├── RetrofitClient.kt    # Network client configuration
+│   ├── WebSocketManager.kt  # WebSocket connection & event parsing
+│   └── models/              # Data models (QueueItem, SavedWorkflow, etc.)
 ├── screens/
-│   ├── HomeScreen.kt        # 首页（服务器、快捷入口）
-│   ├── WorkflowScreen.kt    # 工作流编辑与运行
-│   ├── WorkflowListScreen.kt # 工作流列表
-│   ├── GalleryScreen.kt     # 图库浏览
-│   ├── QueueScreen.kt       # 队列管理
-│   └── SettingsScreen.kt    # 设置
+│   ├── HomeScreen.kt        # Home (server, quick actions)
+│   ├── WorkflowScreen.kt    # Workflow editor & runner
+│   ├── WorkflowListScreen.kt # Workflow list
+│   ├── GalleryScreen.kt     # Gallery browser
+│   ├── QueueScreen.kt       # Queue management
+│   └── SettingsScreen.kt    # Settings
 └── components/
-    └── SwipeableImageViewer.kt  # 全屏图片查看器（缩放/平移/切换）
+    └── SwipeableImageViewer.kt  # Fullscreen image viewer (zoom/pan/swipe)
 ```
 
 ---
 
-## 开源协议
+## License
 
 MIT License
 
 ---
 
-## 致谢
+## Acknowledgements
 
-- [ComfyUI](https://github.com/comfyanonymous/ComfyUI) — 强大的 Stable Diffusion 工作流后端
-- [Jetpack Compose](https://developer.android.com/jetpack/compose) — 现代 Android UI 工具包
-- [Coil](https://coil-kt.github.io/coil/) — Kotlin 图片加载库
+- [ComfyUI](https://github.com/comfyanonymous/ComfyUI) — Powerful Stable Diffusion workflow backend
+- [Jetpack Compose](https://developer.android.com/jetpack/compose) — Modern Android UI toolkit
+- [Coil](https://coil-kt.github.io/coil/) — Kotlin image loading library
